@@ -1,0 +1,9 @@
+node_modules/
+dist/
+bin/
+obj/
+data/*.db
+*.user
+.DS_Store
+template_sot_production.xlsx
+template_sot_lpuma.xlsx
