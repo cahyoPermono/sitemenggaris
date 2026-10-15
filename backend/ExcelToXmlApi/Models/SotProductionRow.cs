@@ -7,6 +7,7 @@ public class SotProductionRow
     public string FacilityName { get; set; } = string.Empty;
     public string FacilityKind { get; set; } = string.Empty;
     public string FacilityNamingSystem { get; set; } = string.Empty;
+    public string ContextFacility { get; set; } = string.Empty;
     public string FacilityParent1 { get; set; } = string.Empty;
     public string FacilityParent1Kind { get; set; } = string.Empty;
     public string FacilityParent2 { get; set; } = string.Empty;

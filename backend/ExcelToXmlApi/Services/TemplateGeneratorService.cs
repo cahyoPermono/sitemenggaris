@@ -12,11 +12,11 @@ public class TemplateGeneratorService
         var headers = new[]
         {
             "prodVolumeName", "prodVolumeOperatorName", "facilityName", "facilityKind", "facilityNamingSystem",
-            "facilityParent1", "facilityParent1Kind", "facilityParent2", "facilityParent2Kind", "flowName",
-            "flowKind", "flowDirection", "flowQualifier", "productName", "productKind", "periodKind",
+            "facilityParent1", "facilityParent2", "contextFacility", "flowName", "flowKind",
+            "flowDirection", "flowQualifier", "productName", "productKind", "periodKind",
             "periodDate", "periodVolumeValue", "periodVolumeValueUom", "periodBlnceSetKind", "BlnceSetCargoNumber",
-            "BlnceSetCargoBatchNumber", "BlnceSetShipper", "BlnceSetBuyer", "BlnceSetDestinationName", "BlnceSetOwner",
-            "BlnceSetEventKind", "periodBlnceSetVolValue", "periodBlnceVolValueUom", "periodCompContWork", "periodCompContWorkUom"
+            "BlnceSetCargoBatchNumber", "BlnceSetShipper", "BlnceSetDestinationName", "BlnceSetOwner", "BlnceSetEventKind",
+            "periodBlnceSetVolValue", "periodBlnceVolValueUom", "periodCompContWork", "periodCompContWorkUom", "BlnceSetBuyer"
         };
 
         for (int i = 0; i < headers.Length; i++)
@@ -29,26 +29,26 @@ public class TemplateGeneratorService
             cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         }
 
-        // Add 2 sample data rows
+        // Add sample data rows matching real TDM data
         var sampleRows = new[]
         {
             new object[]
             {
-                "VOL_PROD_MENGGARIS_20261012", "Pertamina EP", "Menggaris Central Station", "Field", "SKK_STANDARD",
-                "Menggaris Block", "Block", "North Kalimantan", "Region", "FLOW_OIL_EXPORT_01",
-                "production", "outflow", "allocated", "Crude Oil", "oil", "day",
-                "2026-10-12", "1250.75", "bbl", "Cargo", "CRG-2026-001",
-                "BATCH-01", "PHE Menggaris", "PT Kilang Pertamina Internasional", "Kilang Balikpapan", "KKKS Menggaris",
-                "lifting", "1250.75", "bbl", "Crude Oil Processing", "bbl"
+                "JOB PMEP SIMENGGARIS DAILY PRODUCTION REPORT", "JOB PERTAMINA - MEDCO E&P SIMENGGARIS", "TERMINAL BUNYU", "organizational unit", "TDM Jakarta",
+                "SIMENGGARIS", "JOB PERTAMINA MEDCO SIMENGGARIS", "", "ACTUAL LIFTING WITH PPL", "sale",
+                "outlet", "derived", "SOUTH SEMBAKUNG CONDENSATE", "condensate", "day",
+                "2026-02-16", "0", "BBLS", "lifted", "",
+                "", "", "", "", "",
+                "0", "BBLS", "", "", ""
             },
             new object[]
             {
-                "VOL_PROD_MENGGARIS_20261012", "Pertamina EP", "Menggaris Central Station", "Field", "SKK_STANDARD",
-                "Menggaris Block", "Block", "North Kalimantan", "Region", "FLOW_GAS_SALES_02",
-                "production", "outflow", "allocated", "Natural Gas", "gas", "day",
-                "2026-10-12", "15.40", "MMSCF", "Pipeline", "PL-2026-088",
-                "BATCH-02", "PHE Menggaris", "PT PLN Nusantara Power", "PLTMG Menggaris", "KKKS Menggaris",
-                "sales", "15.40", "MMSCF", "Gas Conditioning", "MMSCF"
+                "JOB PMEP SIMENGGARIS DAILY PRODUCTION REPORT", "JOB PERTAMINA - MEDCO E&P SIMENGGARIS", "SOUTH SEMBAKUNG", "field", "TDM Jakarta",
+                "SIMENGGARIS", "JOB PERTAMINA MEDCO SIMENGGARIS", "", "SOUTH SEMBAKUNG CONDENSATE PRODUCTION", "production",
+                "outlet", "derived", "SOUTH SEMBAKUNG CONDENSATE", "condensate", "day",
+                "2026-02-16", "19.620000", "BBLS", "", "",
+                "", "", "", "", "",
+                "", "", "", "", ""
             }
         };
 
@@ -70,15 +70,14 @@ public class TemplateGeneratorService
     public byte[] GenerateSotLpumaTemplate()
     {
         using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("SOT_L-PUMA");
+        var ws = workbook.Worksheets.Add("LPO");
 
         var headers = new[]
         {
-            "By sistem KKKS", "documentDate", "KKKS", "WK", "[Field/Area/Train/Platform/All]",
-            "[Field/Area/Train/Platform/All] Name", "Tanggal", "Hari ke-", "Start Time", "End Time",
-            "eventID", "Kategori", "System Source Level 1", "System Source Level 2", "System Cause Level1",
-            "System Cause Level2", "Kejadian/Kegiatan", "Update Progress", "Jumlah Sumur OFF", "Est. Tanggal Selesai",
-            "Volume LPO Minyak (BBLS)", "Volume LPO Gas (MMSCF)"
+            "KKKS", "WK", "[Field/Area/Train/Platform/All]", "[Field/Area/Train/Platform/All] Name", "Tanggal",
+            "Hari ke-", "Start Time", "End Time", "Event ID", "Kategori",
+            "System Source Level 1", "System Source Level 2", "System Cause Level1", "System Cause Level2", "Kejadian/Kegiatan",
+            "Update Progress", "Jumlah Sumur OFF", "Est. Tanggal Selesai", "Volume LPO Minyak (BBLS)", "Volume LPO Gas (MMSCF)"
         };
 
         for (int i = 0; i < headers.Length; i++)
@@ -91,24 +90,22 @@ public class TemplateGeneratorService
             cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         }
 
-        // Add 2 sample data rows
+        // Add sample data rows matching official SKK Migas format with valid enums
         var sampleRows = new[]
         {
             new object[]
             {
-                "DOC_LPO_20261012_001", "2026-10-12", "Pertamina Hulu Rokan", "WK Rokan", "Field",
-                "Duri Field", "2026-10-12", "1", "08:30:00", "14:45:00",
-                "EVT-SHUT-2026-091", "Unplanned", "Surface Facilities", "Pumping System", "Mechanical Failure",
-                "Motor Bearing Damaged", "Perbaikan pompa transfer utama P-101", "Bearing diganti dan pengujian getaran normal", "3", "2026-10-12",
-                "185.50", "0.25"
+                "JOB PERTAMINA MEDCO SIMENGGARIS", "WK00000391", "Field", "South Sembakung", "2026-08-23",
+                "21", "2026-08-23 00:00:00", "2026-08-23 23:59:59", "MEPS-U-2026-35", "Unplanned",
+                "Wells", "Reservoir", "Wellwork Activity", "WO/WS Activity", "Well SSB-2LS Shut in due to WO/WS",
+                "Masih Berlanjut", "1", "2026-08-31", "0.000000", "1.585000"
             },
             new object[]
             {
-                "DOC_LPO_20261012_001", "2026-10-12", "Pertamina Hulu Rokan", "WK Rokan", "Platform",
-                "Bekasap Platform A", "2026-10-12", "2", "06:00:00", "18:00:00",
-                "EVT-SHUT-2026-092", "Planned", "Pipeline System", "Trunkline 12 inch", "Integrity Inspection",
-                "Pigging Operation", "Pembersihan jalur pipa utama dan ILI tool inspection", "Inspection run 100% completed", "5", "2026-10-13",
-                "420.00", "1.10"
+                "JOB PERTAMINA MEDCO SIMENGGARIS", "WK00000391", "Field", "South Sembakung", "2026-08-23",
+                "17", "2026-08-23 00:00:00", "2026-08-23 23:59:59", "MEPS-U-2026-40", "Unplanned",
+                "Offtaker", "Offtaker", "Offtaker", "Offtaker", "SSB-8 LS shut in due to operational disruption on the buyer (KAYAN)",
+                "Masih Berlanjut", "1", "2026-08-27", "17.105143", "0.780837"
             }
         };
 
@@ -121,6 +118,31 @@ public class TemplateGeneratorService
         }
 
         ws.Columns().AdjustToContents();
+
+        // Sheet 2: Referensi Enum SKK Migas
+        var wsRef = workbook.Worksheets.Add("Referensi Enum");
+        
+        void PopulateRefColumn(int col, string title, IEnumerable<string> items)
+        {
+            var cell = wsRef.Cell(1, col);
+            cell.Value = title;
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#E2E8F0");
+            
+            int row = 2;
+            foreach (var item in items)
+            {
+                wsRef.Cell(row++, col).Value = item;
+            }
+        }
+
+        PopulateRefColumn(1, "Kategori", LpoEnumValidator.ValidCategories);
+        PopulateRefColumn(2, "Facility Type", LpoEnumValidator.ValidFacilityKinds);
+        PopulateRefColumn(3, "Cause / Source Level 1", LpoEnumValidator.ValidCauseSourceLevel1);
+        PopulateRefColumn(4, "Source Level 2", LpoEnumValidator.ValidSourceLevel2);
+        PopulateRefColumn(5, "Cause Level 2", LpoEnumValidator.ValidCauseLevel2);
+
+        wsRef.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
         workbook.SaveAs(ms);

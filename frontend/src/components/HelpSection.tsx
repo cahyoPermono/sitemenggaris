@@ -173,37 +173,36 @@ export const HelpSection: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><span className="code-tag">prodVolumeName</span></td><td>/productVolumes/productVolume[]/name</td></tr>
-                <tr><td>2</td><td><span className="code-tag">prodVolumeOperatorName</span></td><td>/productVolumes/productVolume[]/operator/name</td></tr>
-                <tr><td>3</td><td><span className="code-tag">facilityName</span></td><td>/productVolumes/productVolume[]/facility[]/name</td></tr>
-                <tr><td>4</td><td><span className="code-tag">facilityKind</span></td><td>/productVolumes/productVolume[]/facility[]/name/@kind</td></tr>
-                <tr><td>5</td><td><span className="code-tag">facilityNamingSystem</span></td><td>/productVolumes/productVolume[]/facility[]/namingSystem</td></tr>
-                <tr><td>6</td><td><span className="code-tag">facilityParent1</span></td><td>/productVolumes/productVolume[]/facility[]/facilityParent1</td></tr>
-                <tr><td>7</td><td><span className="code-tag">facilityParent1Kind</span></td><td>/productVolumes/productVolume[]/facility[]/facilityParent1/@kind</td></tr>
-                <tr><td>8</td><td><span className="code-tag">facilityParent2</span></td><td>/productVolumes/productVolume[]/facility[]/facilityParent2</td></tr>
-                <tr><td>9</td><td><span className="code-tag">facilityParent2Kind</span></td><td>/productVolumes/productVolume[]/facility[]/facilityParent2/@kind</td></tr>
-                <tr><td>10</td><td><span className="code-tag">flowName</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/name</td></tr>
-                <tr><td>11</td><td><span className="code-tag">flowKind</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/kind</td></tr>
-                <tr><td>12</td><td><span className="code-tag">flowDirection</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/direction</td></tr>
-                <tr><td>13</td><td><span className="code-tag">flowQualifier</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/qualifier</td></tr>
-                <tr><td>14</td><td><span className="code-tag">productName</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/name</td></tr>
-                <tr><td>15</td><td><span className="code-tag">productKind</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/kind</td></tr>
-                <tr><td>16</td><td><span className="code-tag">periodKind</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/kind</td></tr>
-                <tr><td>17</td><td><span className="code-tag">periodDate</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/date</td></tr>
-                <tr><td>18</td><td><span className="code-tag">periodVolumeValue</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/volume</td></tr>
-                <tr><td>19</td><td><span className="code-tag">periodVolumeValueUom</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/volume/@uom</td></tr>
-                <tr><td>20</td><td><span className="code-tag">periodBlnceSetKind</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/kind</td></tr>
-                <tr><td>21</td><td><span className="code-tag">BlnceSetCargoNumber</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/cargoNumber</td></tr>
-                <tr><td>22</td><td><span className="code-tag">BlnceSetCargoBatchNumber</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/cargoBatchNumber</td></tr>
-                <tr><td>23</td><td><span className="code-tag">BlnceSetShipper</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/shipper</td></tr>
-                <tr><td>24</td><td><span className="code-tag">BlnceSetBuyer</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/buyer</td></tr>
-                <tr><td>25</td><td><span className="code-tag">BlnceSetDestinationName</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/destination/name</td></tr>
-                <tr><td>26</td><td><span className="code-tag">BlnceSetOwner</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/owner</td></tr>
-                <tr><td>27</td><td><span className="code-tag">BlnceSetEventKind</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/event/kind</td></tr>
-                <tr><td>28</td><td><span className="code-tag">periodBlnceSetVolValue</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/volumeValue/volume</td></tr>
-                <tr><td>29</td><td><span className="code-tag">periodBlnceVolValueUom</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/volumeValue/@uom</td></tr>
-                <tr><td>30</td><td><span className="code-tag">periodCompContWork</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/componentContent/work/</td></tr>
-                <tr><td>31</td><td><span className="code-tag">periodCompContWorkUom</span></td><td>/productVolumes/productVolume[]/facility[]/flow[]/product[]/period/balanceSet[]/balanceDetail/componentContent/work/@uom</td></tr>
+                <tr><td>1</td><td><span className="code-tag">prodVolumeName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:name</td></tr>
+                <tr><td>2</td><td><span className="code-tag">prodVolumeOperatorName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:operator/prodml:name</td></tr>
+                <tr><td>3</td><td><span className="code-tag">facilityName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:name</td></tr>
+                <tr><td>4</td><td><span className="code-tag">facilityKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:name/@kind</td></tr>
+                <tr><td>5</td><td><span className="code-tag">facilityNamingSystem</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:namingSystem</td></tr>
+                <tr><td>6</td><td><span className="code-tag">facilityParent1</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:facilityParent1</td></tr>
+                <tr><td>7</td><td><span className="code-tag">facilityParent2</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:facilityParent2</td></tr>
+                <tr><td>8</td><td><span className="code-tag">contextFacility</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:contextFacility</td></tr>
+                <tr><td>9</td><td><span className="code-tag">flowName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:name</td></tr>
+                <tr><td>10</td><td><span className="code-tag">flowKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:kind</td></tr>
+                <tr><td>11</td><td><span className="code-tag">flowDirection</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:direction</td></tr>
+                <tr><td>12</td><td><span className="code-tag">flowQualifier</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:qualifier</td></tr>
+                <tr><td>13</td><td><span className="code-tag">productName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:name</td></tr>
+                <tr><td>14</td><td><span className="code-tag">productKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:kind</td></tr>
+                <tr><td>15</td><td><span className="code-tag">periodKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:kind</td></tr>
+                <tr><td>16</td><td><span className="code-tag">periodDate</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:date</td></tr>
+                <tr><td>17</td><td><span className="code-tag">periodVolumeValue</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:volume</td></tr>
+                <tr><td>18</td><td><span className="code-tag">periodVolumeValueUom</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:volume/@uom</td></tr>
+                <tr><td>19</td><td><span className="code-tag">periodBlnceSetKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:kind</td></tr>
+                <tr><td>20</td><td><span className="code-tag">BlnceSetCargoNumber</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:cargoNumber</td></tr>
+                <tr><td>21</td><td><span className="code-tag">BlnceSetCargoBatchNumber</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:cargoBatchNumber</td></tr>
+                <tr><td>22</td><td><span className="code-tag">BlnceSetShipper</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:shipper</td></tr>
+                <tr><td>23</td><td><span className="code-tag">BlnceSetBuyer</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:buyer</td></tr>
+                <tr><td>24</td><td><span className="code-tag">BlnceSetDestinationName</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:destination/prodml:name</td></tr>
+                <tr><td>25</td><td><span className="code-tag">BlnceSetOwner</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:owner</td></tr>
+                <tr><td>26</td><td><span className="code-tag">BlnceSetEventKind</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:event/prodml:kind</td></tr>
+                <tr><td>27</td><td><span className="code-tag">periodBlnceSetVolValue</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:volumeValue/prodml:volume</td></tr>
+                <tr><td>28</td><td><span className="code-tag">periodBlnceVolValueUom</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:volumeValue/prodml:volume/@uom</td></tr>
+                <tr><td>29</td><td><span className="code-tag">periodCompContWork</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:componentContent/prodml:work</td></tr>
+                <tr><td>30</td><td><span className="code-tag">periodCompContWorkUom</span></td><td>/prodml:productVolumes/prodml:productVolume[]/prodml:facility[]/prodml:flow[]/prodml:product[]/prodml:period/prodml:balanceSet[]/prodml:balanceDetail/prodml:componentContent/prodml:work/@uom</td></tr>
               </tbody>
             </table>
           ) : (
@@ -212,33 +211,31 @@ export const HelpSection: React.FC = () => {
                 <tr>
                   <th>No</th>
                   <th>Source Data (Kolom Excel)</th>
-                  <th>XML Element</th>
-                  <th>XML Path</th>
+                  <th>XML Element / Atribut</th>
+                  <th>XML Path (LPO Schema)</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><span className="code-tag">By sistem KKKS</span></td><td>documentName</td><td>/lossProductionOpportunity/documentName</td></tr>
-                <tr><td>2</td><td><span className="code-tag">By sistem KKKS</span></td><td>documentDate</td><td>/lossProductionOpportunity/documentDate</td></tr>
-                <tr><td>3</td><td><span className="code-tag">KKKS</span></td><td>operator</td><td>/lossProductionOpportunity/operator</td></tr>
-                <tr><td>4</td><td><span className="code-tag">WK</span></td><td>wilayahKerja</td><td>/lossProductionOpportunity/wilayahKerja</td></tr>
-                <tr><td>5</td><td><span className="code-tag">[Field/Area/Train/Platform/All]</span></td><td>facilityKind</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/facilityKind</td></tr>
-                <tr><td>6</td><td><span className="code-tag">[Field/Area/Train/Platform/All] Name</span></td><td>facilityName</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/facilityName</td></tr>
-                <tr><td>7</td><td><span className="code-tag">Tanggal</span></td><td>eventDate</td><td>/lossProductionOpportunity/events/eventDate/@date</td></tr>
-                <tr><td>8</td><td><span className="code-tag">Hari ke-</span></td><td>days</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/days</td></tr>
-                <tr><td>9</td><td><span className="code-tag">Start Time</span></td><td>startTime</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/startTime</td></tr>
-                <tr><td>10</td><td><span className="code-tag">End Time</span></td><td>endTime</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/endTime</td></tr>
-                <tr><td>11</td><td><span className="code-tag">eventID</span></td><td>shutdownID</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/shutdownID</td></tr>
-                <tr><td>12</td><td><span className="code-tag">Kategori</span></td><td>category</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/category</td></tr>
-                <tr><td>13</td><td><span className="code-tag">System Source Level 1</span></td><td>systemSourceLevel1</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/systemSourceLevel1</td></tr>
-                <tr><td>14</td><td><span className="code-tag">System Source Level 2</span></td><td>systemSourceLevel2</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/systemSourceLevel2</td></tr>
-                <tr><td>15</td><td><span className="code-tag">System Cause Level1</span></td><td>systemCauseLevel1</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/systemCauseLevel1</td></tr>
-                <tr><td>16</td><td><span className="code-tag">System Cause Level2</span></td><td>systemCauseLevel2</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/systemCauseLevel2</td></tr>
-                <tr><td>17</td><td><span className="code-tag">Kejadian/Kegiatan</span></td><td>eventsActivities</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/eventsActivities</td></tr>
-                <tr><td>18</td><td><span className="code-tag">Update Progress</span></td><td>updateProgress</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/updateProgress</td></tr>
-                <tr><td>19</td><td><span className="code-tag">Jumlah Sumur OFF</span></td><td>totalWellOFF</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/totalWellOFF</td></tr>
-                <tr><td>20</td><td><span className="code-tag">Est. Tanggal Selesai</span></td><td>estFinishTime</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/estFinishTime</td></tr>
-                <tr><td>21</td><td><span className="code-tag">Volume LPO Minyak (BBLS)</span></td><td>volumeOil</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/volumeOil</td></tr>
-                <tr><td>22</td><td><span className="code-tag">Volume LPO Gas (MMSCF)</span></td><td>volumeGas</td><td>/lossProductionOpportunity/events/eventDate/event[1]/facility/volumeGas</td></tr>
+                <tr><td>1</td><td><span className="code-tag">KKKS</span> / <span className="code-tag">operator</span></td><td>operator</td><td>/lossProductionOpportunity/operator</td></tr>
+                <tr><td>2</td><td><span className="code-tag">WK</span> / <span className="code-tag">wilayahKerja</span></td><td>wilayahKerja</td><td>/lossProductionOpportunity/wilayahKerja</td></tr>
+                <tr><td>3</td><td><span className="code-tag">FACILITY_TYPE</span> / <span className="code-tag">[Field/Area/Train/Platform/All]</span></td><td>@facilityKind</td><td>/events/eventDate/event/facility/@facilityKind</td></tr>
+                <tr><td>4</td><td><span className="code-tag">FACILITY_NAME</span> / <span className="code-tag">[Field/...] Name</span></td><td>@facilityName</td><td>/events/eventDate/event/facility/@facilityName</td></tr>
+                <tr><td>5</td><td><span className="code-tag">EVENT_DATE</span> / <span className="code-tag">Tanggal</span></td><td>@date</td><td>/events/eventDate/@date</td></tr>
+                <tr><td>6</td><td><span className="code-tag">DAY_NUMBER</span> / <span className="code-tag">Hari ke-</span></td><td>days</td><td>/events/eventDate/event/facility/days</td></tr>
+                <tr><td>7</td><td><span className="code-tag">START_TIME</span> / <span className="code-tag">Start Time</span></td><td>startTime</td><td>/events/eventDate/event/facility/startTime (ISO-8601)</td></tr>
+                <tr><td>8</td><td><span className="code-tag">END_TIME</span> / <span className="code-tag">End Time</span></td><td>endTime</td><td>/events/eventDate/event/facility/endTime (ISO-8601)</td></tr>
+                <tr><td>9</td><td><span className="code-tag">EVENT_ID</span> / <span className="code-tag">Event ID</span></td><td>@eventId</td><td>/events/eventDate/event/@eventId</td></tr>
+                <tr><td>10</td><td><span className="code-tag">CATEGORY</span> / <span className="code-tag">Kategori</span></td><td>category</td><td>/events/eventDate/event/facility/category (Enum XSD)</td></tr>
+                <tr><td>11</td><td><span className="code-tag">SYSTEM_SOURCE_LEVEL_1</span> / <span className="code-tag">System Source Level 1</span></td><td>systemSourceLevel1</td><td>/events/eventDate/event/facility/systemSourceLevel1 (Enum XSD)</td></tr>
+                <tr><td>12</td><td><span className="code-tag">SYSTEM_SOURCE_LEVEL_2</span> / <span className="code-tag">System Source Level 2</span></td><td>systemSourceLevel2</td><td>/events/eventDate/event/facility/systemSourceLevel2 (Enum XSD)</td></tr>
+                <tr><td>13</td><td><span className="code-tag">SYSTEM_CAUSE_LEVEL_1</span> / <span className="code-tag">System Cause Level1</span></td><td>systemCauseLevel1</td><td>/events/eventDate/event/facility/systemCauseLevel1 (Enum XSD)</td></tr>
+                <tr><td>14</td><td><span className="code-tag">SYSTEM_CAUSE_LEVEL_2</span> / <span className="code-tag">System Cause Level2</span></td><td>systemCauseLevel2</td><td>/events/eventDate/event/facility/systemCauseLevel2 (Enum XSD)</td></tr>
+                <tr><td>15</td><td><span className="code-tag">ACTIVITY_DESCRIPTION</span> / <span className="code-tag">Kejadian/Kegiatan</span></td><td>eventsActivities</td><td>/events/eventDate/event/facility/eventsActivities</td></tr>
+                <tr><td>16</td><td><span className="code-tag">UPDATE_PROGRESS</span> / <span className="code-tag">Update Progress</span></td><td>updateProgress</td><td>/events/eventDate/event/facility/updateProgress (Opsional)</td></tr>
+                <tr><td>17</td><td><span className="code-tag">TOTAL_WELL_OFF</span> / <span className="code-tag">Jumlah Sumur OFF</span></td><td>totalWellOFF</td><td>/events/eventDate/event/facility/totalWellOFF (Opsional)</td></tr>
+                <tr><td>18</td><td><span className="code-tag">ESTIMATED_FINISH_DATE</span> / <span className="code-tag">Est. Tanggal Selesai</span></td><td>estFinishDate</td><td>/events/eventDate/event/facility/estFinishDate (Opsional)</td></tr>
+                <tr><td>19</td><td><span className="code-tag">VOLUME_OIL</span> / <span className="code-tag">Volume LPO Minyak (BBLS)</span></td><td>volumeOil</td><td>/events/eventDate/event/facility/volumeOil (Decimal)</td></tr>
+                <tr><td>20</td><td><span className="code-tag">VOLUME_GAS</span> / <span className="code-tag">Volume LPO Gas (MMSCF)</span></td><td>volumeGas</td><td>/events/eventDate/event/facility/volumeGas (Decimal)</td></tr>
               </tbody>
             </table>
           )}

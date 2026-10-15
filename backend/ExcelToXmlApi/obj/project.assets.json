@@ -2864,11 +2864,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/src/ExcelToXmlApi.csproj",
+      "projectUniqueName": "/app/ExcelToXmlApi.csproj",
       "projectName": "ExcelToXmlApi",
-      "projectPath": "/src/ExcelToXmlApi.csproj",
+      "projectPath": "/app/ExcelToXmlApi.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/src/obj/",
+      "outputPath": "/app/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"

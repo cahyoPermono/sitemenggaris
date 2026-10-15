@@ -11,6 +11,7 @@ export interface ConversionResponse {
   createdAt: string;
   xmlContent: string;
   errorMessage?: string;
+  warnings?: string[];
   downloadUrl: string;
 }
 

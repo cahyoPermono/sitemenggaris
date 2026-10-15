@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "E+xdDGmsdQI=",
+  "dgSpecHash": "gobErfZN9JM=",
   "success": true,
-  "projectFilePath": "/src/ExcelToXmlApi.csproj",
+  "projectFilePath": "/app/ExcelToXmlApi.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/closedxml/0.104.2/closedxml.0.104.2.nupkg.sha512",
     "/root/.nuget/packages/closedxml.parser/1.2.0/closedxml.parser.1.2.0.nupkg.sha512",

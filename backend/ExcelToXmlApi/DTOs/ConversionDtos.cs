@@ -18,6 +18,7 @@ public class ConversionResponseDto
     public DateTime CreatedAt { get; set; }
     public string XmlContent { get; set; } = string.Empty;
     public string? ErrorMessage { get; set; }
+    public List<string> Warnings { get; set; } = new();
     public string DownloadUrl { get; set; } = string.Empty;
 }
 

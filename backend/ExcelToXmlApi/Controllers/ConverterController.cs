@@ -67,6 +67,8 @@ public class ConverterController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+        var warnings = new List<string>();
+
         try
         {
             using var stream = file.OpenReadStream();
@@ -75,11 +77,11 @@ public class ConverterController : ControllerBase
 
             if (isLpuma)
             {
-                (xml, count) = _sotLpumaConverter.Convert(stream, file.FileName);
+                (xml, count, warnings) = _sotLpumaConverter.Convert(stream, file.FileName);
             }
             else
             {
-                (xml, count) = _sotProductionConverter.Convert(stream, file.FileName);
+                (xml, count, warnings) = _sotProductionConverter.Convert(stream, file.FileName);
             }
 
             record.Status = "Berhasil";
@@ -110,6 +112,7 @@ public class ConverterController : ControllerBase
             CreatedAt = record.CreatedAt,
             XmlContent = record.XmlContent,
             ErrorMessage = record.ErrorMessage,
+            Warnings = warnings,
             DownloadUrl = $"/api/converter/download/{record.Id}"
         };
 

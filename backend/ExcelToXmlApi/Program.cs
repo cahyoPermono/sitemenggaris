@@ -16,12 +16,26 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure SQLite
+// Configure Database (SQL Server / SQLite fallback)
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Data Source=data/conversions.db";
-    options.UseSqlite(connectionString);
+        ?? "Server=sqlserver,1433;Database=SitemenggarisDb;User Id=sa;Password=Simenggaris2026!;TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=False";
+
+    if (connectionString.Contains("Server=") || connectionString.Contains("Data Source=") && connectionString.Contains(";"))
+    {
+        options.UseSqlServer(connectionString, sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorNumbersToAdd: null);
+        });
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
 });
 
 // Configure DI
@@ -42,11 +56,33 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Auto-migrate or ensure database is created
+// Auto-migrate or ensure database is created with retry loop for container readiness
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    int maxRetries = 15;
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            logger.LogInformation("Attempting to connect to database (Attempt {Attempt}/{MaxRetries})...", attempt, maxRetries);
+            db.Database.EnsureCreated();
+            logger.LogInformation("Database connection successful and schema verified.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("Database not ready yet (Attempt {Attempt}/{MaxRetries}): {Message}", attempt, maxRetries, ex.Message);
+            if (attempt == maxRetries)
+            {
+                logger.LogError(ex, "Failed to connect to database after {MaxRetries} attempts.", maxRetries);
+                throw;
+            }
+            Thread.Sleep(3000);
+        }
+    }
 }
 
 app.UseSwagger();

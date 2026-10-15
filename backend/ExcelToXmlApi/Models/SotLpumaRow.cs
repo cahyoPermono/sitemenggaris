@@ -12,7 +12,7 @@ public class SotLpumaRow
     public string Days { get; set; } = string.Empty;
     public string StartTime { get; set; } = string.Empty;
     public string EndTime { get; set; } = string.Empty;
-    public string ShutdownId { get; set; } = string.Empty;
+    public string EventId { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string SystemSourceLevel1 { get; set; } = string.Empty;
     public string SystemSourceLevel2 { get; set; } = string.Empty;
@@ -21,7 +21,7 @@ public class SotLpumaRow
     public string EventsActivities { get; set; } = string.Empty;
     public string UpdateProgress { get; set; } = string.Empty;
     public string TotalWellOff { get; set; } = string.Empty;
-    public string EstFinishTime { get; set; } = string.Empty;
+    public string EstFinishDate { get; set; } = string.Empty;
     public string VolumeOil { get; set; } = string.Empty;
     public string VolumeGas { get; set; } = string.Empty;
 }

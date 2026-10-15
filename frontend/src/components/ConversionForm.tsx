@@ -297,6 +297,31 @@ export const ConversionForm: React.FC<ConversionFormProps> = ({ onConversionSucc
             </div>
           </div>
 
+          {result.warnings && result.warnings.length > 0 && (
+            <div
+              style={{
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginTop: '16px',
+                marginBottom: '16px',
+                color: '#92400e',
+                fontSize: '0.85rem',
+              }}
+            >
+              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <AlertTriangle size={16} color="#d97706" />
+                <span>Peringatan Validasi ({result.warnings.length} Catatan):</span>
+              </div>
+              <ul style={{ paddingLeft: '20px', margin: 0, maxHeight: '160px', overflowY: 'auto' }}>
+                {result.warnings.map((w, idx) => (
+                  <li key={idx} style={{ marginBottom: '4px' }}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="result-action-row">
             <a
               href={`/api/converter/download/${result.id}`}
