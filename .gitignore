@@ -7,3 +7,4 @@ data/*.db
 .DS_Store
 template_sot_production.xlsx
 template_sot_lpuma.xlsx
+docs/
