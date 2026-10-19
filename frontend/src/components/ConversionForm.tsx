@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileSpreadsheet, Trash2, Settings, Download, Eye, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Trash2, Settings, Download, Eye, CheckCircle2, AlertTriangle, RefreshCw, Info } from 'lucide-react';
 import { SchemaType, ConversionResponse } from '../types';
 import { XmlPreviewModal } from './XmlPreviewModal';
 
@@ -221,6 +221,19 @@ export const ConversionForm: React.FC<ConversionFormProps> = ({ onConversionSucc
           />
         </div>
 
+        {/* Catatan Filter & Grouping */}
+        <div className="filter-grouping-notice">
+          <div className="notice-icon-box">
+            <Info size={20} />
+          </div>
+          <div>
+            <div className="notice-title">Catatan Fitur Filter & Grouping Excel:</div>
+            <p className="notice-desc">
+              Sistem telah mendukung filter dan grouping otomatis. Jika file Excel Anda memiliki baris yang <span className="notice-highlight">difilter (AutoFilter)</span>, <span className="notice-highlight">di-grouping & di-collapse (disembunyikan)</span>, atau <span className="notice-highlight">di-hide secara manual</span>, maka hanya baris data yang <strong>aktif / terlihat (visible)</strong> saat file disimpan yang akan diekspor ke file XML.
+            </p>
+          </div>
+        </div>
+
         {errorMessage && (
           <div
             style={{
@@ -264,63 +277,88 @@ export const ConversionForm: React.FC<ConversionFormProps> = ({ onConversionSucc
       </form>
 
       {/* Success Result Banner */}
-      {result && result.status === 'Berhasil' && (
-        <div className="conversion-result-banner">
-          <div className="result-header">
-            <div className="result-status-title">
-              <CheckCircle2 size={24} color="#166534" />
-              <span>Konversi Berhasil Diselesaikan!</span>
-            </div>
-            <button type="button" className="btn-secondary" onClick={handleReset}>
-              Konversi File Lain
-            </button>
-          </div>
+      {result && result.status === 'Berhasil' && (() => {
+        const filterNotices = (result.warnings || []).filter(w => w.startsWith('Informasi Filter/Grouping:'));
+        const validationWarnings = (result.warnings || []).filter(w => !w.startsWith('Informasi Filter/Grouping:'));
 
-          <div className="result-grid-stats">
-            <div className="stat-item">
-              <div className="stat-label">File Asli</div>
-              <div className="stat-val">{result.originalFileName}</div>
+        return (
+          <div className="conversion-result-banner">
+            <div className="result-header">
+              <div className="result-status-title">
+                <CheckCircle2 size={24} color="#166534" />
+                <span>Konversi Berhasil Diselesaikan!</span>
+              </div>
+              <button type="button" className="btn-secondary" onClick={handleReset}>
+                Konversi File Lain
+              </button>
             </div>
-            <div className="stat-item">
-              <div className="stat-label">Nama Hasil</div>
-              <div className="stat-val">{result.customFileName || result.originalFileName}.xml</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-label">Skema Data</div>
-              <div className="stat-val">
-                {result.schemaType === 'SOT_PRODUCTION' ? 'SOT Production' : 'SOT L-PUMA'}
+
+            <div className="result-grid-stats">
+              <div className="stat-item">
+                <div className="stat-label">File Asli</div>
+                <div className="stat-val">{result.originalFileName}</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Nama Hasil</div>
+                <div className="stat-val">{result.customFileName || result.originalFileName}.xml</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Skema Data</div>
+                <div className="stat-val">
+                  {result.schemaType === 'SOT_PRODUCTION' ? 'SOT Production' : 'SOT L-PUMA'}
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-label">Data Terproses</div>
+                <div className="stat-val">{result.rowCount} Baris</div>
               </div>
             </div>
-            <div className="stat-item">
-              <div className="stat-label">Data Terproses</div>
-              <div className="stat-val">{result.rowCount} Baris</div>
-            </div>
-          </div>
 
-          {result.warnings && result.warnings.length > 0 && (
-            <div
-              style={{
-                background: '#fffbeb',
-                border: '1px solid #fde68a',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                marginTop: '16px',
-                marginBottom: '16px',
-                color: '#92400e',
-                fontSize: '0.85rem',
-              }}
-            >
-              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <AlertTriangle size={16} color="#d97706" />
-                <span>Peringatan Validasi ({result.warnings.length} Catatan):</span>
+            {filterNotices.map((notice, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginTop: '16px',
+                  color: '#166534',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}
+              >
+                <CheckCircle2 size={18} color="#16a34a" />
+                <span>{notice}</span>
               </div>
-              <ul style={{ paddingLeft: '20px', margin: 0, maxHeight: '160px', overflowY: 'auto' }}>
-                {result.warnings.map((w, idx) => (
-                  <li key={idx} style={{ marginBottom: '4px' }}>{w}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            ))}
+
+            {validationWarnings.length > 0 && (
+              <div
+                style={{
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginTop: '16px',
+                  marginBottom: '16px',
+                  color: '#92400e',
+                  fontSize: '0.85rem',
+                }}
+              >
+                <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <AlertTriangle size={16} color="#d97706" />
+                  <span>Peringatan Validasi ({validationWarnings.length} Catatan):</span>
+                </div>
+                <ul style={{ paddingLeft: '20px', margin: 0, maxHeight: '160px', overflowY: 'auto' }}>
+                  {validationWarnings.map((w, idx) => (
+                    <li key={idx} style={{ marginBottom: '4px' }}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
           <div className="result-action-row">
             <a
@@ -344,7 +382,8 @@ export const ConversionForm: React.FC<ConversionFormProps> = ({ onConversionSucc
             </button>
           </div>
         </div>
-      )}
+      );
+    })()}
 
       {/* Modal XML Preview */}
       {result && (

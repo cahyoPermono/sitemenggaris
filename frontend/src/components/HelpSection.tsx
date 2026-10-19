@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, CheckCircle2, BookOpen, Layers } from 'lucide-react';
+import { Download, FileSpreadsheet, CheckCircle2, BookOpen, Layers, Filter } from 'lucide-react';
 
 export const HelpSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sot-production' | 'sot-lpuma'>('sot-production');
@@ -128,6 +128,22 @@ export const HelpSection: React.FC = () => {
               <span>Peserta Tender menyerahkan link aplikasi yang dapat diakses (Docker container ready).</span>
             </div>
           </div>
+        </div>
+
+        {/* Dukungan AutoFilter & Grouping (Row Visibility) */}
+        <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderLeft: '4px solid #0066cc', borderRadius: '12px', padding: '20px', marginBottom: '32px' }}>
+          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f4c81', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Filter size={18} color="#0066cc" />
+            <span>Dukungan Excel Filter & Grouping (Row Visibility)</span>
+          </h4>
+          <p style={{ fontSize: '0.85rem', color: '#334155', lineHeight: 1.6, marginBottom: '10px' }}>
+            Aplikasi secara otomatis membaca status tampilan baris (<em>row visibility</em>) pada file Excel Anda (.xlsx):
+          </p>
+          <ul style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <li><strong>AutoFilter:</strong> Baris yang tersembunyi karena filter di Excel tidak akan diikutsertakan ke dalam XML.</li>
+            <li><strong>Grouping / Outline:</strong> Grup baris yang di-<em>collapse</em> (tanda minus [-] ditutup menjadi [+]) otomatis dilewati dan tidak diekspor.</li>
+            <li><strong>Hide Rows Manual:</strong> Baris yang disembunyikan secara manual (klik kanan &gt; Hide) juga otomatis dilewati.</li>
+          </ul>
         </div>
 
         {/* Mapping Tables Reference */}

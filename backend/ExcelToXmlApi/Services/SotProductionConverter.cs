@@ -2,6 +2,7 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using System.Xml.Linq;
+using ClosedXML.Excel;
 using ExcelDataReader;
 using ExcelToXmlApi.Models;
 
@@ -15,13 +16,22 @@ public class SotProductionConverter : ISotProductionConverter
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        var rows = ParseExcelRows(excelStream);
+        using var ms = new MemoryStream();
+        excelStream.CopyTo(ms);
+        ms.Position = 0;
+
+        var (rows, hiddenCount) = ParseExcelRows(ms);
         if (rows.Count == 0)
         {
-            throw new InvalidOperationException("File Excel tidak memiliki data atau format tidak dikenali.");
+            throw new InvalidOperationException("File Excel tidak memiliki data atau seluruh baris disembunyikan/difilter keluar.");
         }
 
         var warnings = new List<string>();
+        if (hiddenCount > 0)
+        {
+            warnings.Add($"Informasi Filter/Grouping: Terdapat {hiddenCount} baris data yang dilewati karena berstatus disembunyikan / difilter (AutoFilter atau Grouping Collapse). Hanya {rows.Count} baris aktif (visible) yang dikonversi ke XML.");
+        }
+
         // Check if mandatory fields are missing
         for (int i = 0; i < rows.Count; i++)
         {
@@ -45,7 +55,223 @@ public class SotProductionConverter : ISotProductionConverter
         return (xmlString, rows.Count, warnings);
     }
 
-    private List<SotProductionRow> ParseExcelRows(Stream stream)
+    private (List<SotProductionRow> rows, int hiddenCount) ParseExcelRows(Stream stream)
+    {
+        try
+        {
+            return ParseExcelRowsClosedXml(stream);
+        }
+        catch
+        {
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+                var legacyRows = ParseExcelRowsExcelDataReader(stream);
+                return (legacyRows, 0);
+            }
+            throw;
+        }
+    }
+
+    private (List<SotProductionRow> rows, int hiddenCount) ParseExcelRowsClosedXml(Stream stream)
+    {
+        var list = new List<SotProductionRow>();
+        int hiddenCount = 0;
+
+        using var workbook = new XLWorkbook(stream);
+        if (workbook.Worksheets.Count == 0) return (list, 0);
+
+        IXLWorksheet worksheet = workbook.Worksheet(1);
+        int headerRowNum = -1;
+        var colMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        // Cari sheet terbaik yang memuat kolom SOT Production
+        foreach (var ws in workbook.Worksheets)
+        {
+            int maxScan = Math.Min(15, ws.LastRowUsed()?.RowNumber() ?? 0);
+            for (int r = 1; r <= maxScan; r++)
+            {
+                var row = ws.Row(r);
+                var tempMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                int lastCol = ws.LastColumnUsed()?.ColumnNumber() ?? 0;
+                for (int c = 1; c <= lastCol; c++)
+                {
+                    var val = row.Cell(c).GetString().Trim();
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        tempMap[CleanHeader(val)] = c;
+                    }
+                }
+
+                if (tempMap.ContainsKey("prodvolumename") || tempMap.ContainsKey("facilityname"))
+                {
+                    worksheet = ws;
+                    headerRowNum = r;
+                    colMap = tempMap;
+                    break;
+                }
+            }
+            if (headerRowNum != -1) break;
+        }
+
+        // Fallback jika tidak terdeteksi spesifik: gunakan baris pertama sheet pertama
+        if (headerRowNum == -1)
+        {
+            worksheet = workbook.Worksheet(1);
+            headerRowNum = 1;
+            int lastCol = worksheet.LastColumnUsed()?.ColumnNumber() ?? 0;
+            for (int c = 1; c <= lastCol; c++)
+            {
+                var val = worksheet.Row(1).Cell(c).GetString().Trim();
+                if (!string.IsNullOrEmpty(val))
+                {
+                    colMap[CleanHeader(val)] = c;
+                }
+            }
+        }
+
+        int totalRows = worksheet.LastRowUsed()?.RowNumber() ?? 0;
+        for (int r = headerRowNum + 1; r <= totalRows; r++)
+        {
+            var row = worksheet.Row(r);
+
+            // KUNCI: Lewati baris jika difilter keluar (AutoFilter), di-grouping & collapsed, atau di-hide!
+            if (row.IsHidden || row.Height <= 0)
+            {
+                if (row.CellsUsed().Any(c => !string.IsNullOrWhiteSpace(c.GetString())))
+                {
+                    hiddenCount++;
+                }
+                continue;
+            }
+
+            // Check if row is empty
+            bool allEmpty = true;
+            foreach (var cell in row.CellsUsed())
+            {
+                if (!string.IsNullOrWhiteSpace(cell.GetString()))
+                {
+                    allEmpty = false;
+                    break;
+                }
+            }
+            if (allEmpty) continue;
+
+            var rawPeriodDate = GetRawColValue(row, colMap, "periodDate", "period_date", "date", "tanggal");
+
+            var item = new SotProductionRow
+            {
+                ProdVolumeName = GetColString(row, colMap, "prodVolumeName", "volumeName", "prod_volume_name"),
+                ProdVolumeOperatorName = GetColString(row, colMap, "prodVolumeOperatorName", "operatorName", "operator", "prod_volume_operator_name"),
+                FacilityName = GetColString(row, colMap, "facilityName", "facility_name"),
+                FacilityKind = GetColString(row, colMap, "facilityKind", "facility_kind"),
+                FacilityNamingSystem = GetColString(row, colMap, "facilityNamingSystem", "namingSystem", "facility_naming_system"),
+                ContextFacility = GetColString(row, colMap, "contextFacility", "context_facility"),
+                FacilityParent1 = GetColString(row, colMap, "facilityParent1", "facility_parent1", "parent1"),
+                FacilityParent1Kind = GetColString(row, colMap, "facilityParent1Kind", "facility_parent1_kind", "parent1Kind"),
+                FacilityParent2 = GetColString(row, colMap, "facilityParent2", "facility_parent2", "parent2"),
+                FacilityParent2Kind = GetColString(row, colMap, "facilityParent2Kind", "facility_parent2_kind", "parent2Kind"),
+                FlowName = GetColString(row, colMap, "flowName", "flow_name"),
+                FlowKind = GetColString(row, colMap, "flowKind", "flow_kind"),
+                FlowDirection = GetColString(row, colMap, "flowDirection", "flow_direction"),
+                FlowQualifier = GetColString(row, colMap, "flowQualifier", "flow_qualifier"),
+                ProductName = GetColString(row, colMap, "productName", "product_name"),
+                ProductKind = GetColString(row, colMap, "productKind", "product_kind"),
+                PeriodKind = GetColString(row, colMap, "periodKind", "period_kind"),
+                PeriodDate = ParseDateString(rawPeriodDate),
+                PeriodVolumeValue = GetColString(row, colMap, "periodVolumeValue", "volumeValue", "volume", "period_volume_value"),
+                PeriodVolumeValueUom = GetColString(row, colMap, "periodVolumeValueUom", "volumeUom", "uom", "period_volume_value_uom"),
+                PeriodBlnceSetKind = GetColString(row, colMap, "periodBlnceSetKind", "balanceSetKind", "period_blnce_set_kind"),
+                BlnceSetCargoNumber = GetColString(row, colMap, "BlnceSetCargoNumber", "cargoNumber", "blnce_set_cargo_number"),
+                BlnceSetCargoBatchNumber = GetColString(row, colMap, "BlnceSetCargoBatchNumber", "cargoBatchNumber", "blnce_set_cargo_batch_number"),
+                BlnceSetShipper = GetColString(row, colMap, "BlnceSetShipper", "shipper", "blnce_set_shipper"),
+                BlnceSetBuyer = GetColString(row, colMap, "BlnceSetBuyer", "buyer", "blnce_set_buyer"),
+                BlnceSetDestinationName = GetColString(row, colMap, "BlnceSetDestinationName", "destinationName", "destination", "blnce_set_destination_name"),
+                BlnceSetOwner = GetColString(row, colMap, "BlnceSetOwner", "owner", "blnce_set_owner"),
+                BlnceSetEventKind = GetColString(row, colMap, "BlnceSetEventKind", "eventKind", "blnce_set_event_kind"),
+                PeriodBlnceSetVolValue = GetColString(row, colMap, "periodBlnceSetVolValue", "balanceVolumeValue", "period_blnce_set_vol_value"),
+                PeriodBlnceVolValueUom = GetColString(row, colMap, "periodBlnceVolValueUom", "balanceVolumeUom", "period_blnce_vol_value_uom"),
+                PeriodCompContWork = GetColString(row, colMap, "periodCompContWork", "componentContentWork", "period_comp_cont_work"),
+                PeriodCompContWorkUom = GetColString(row, colMap, "periodCompContWorkUom", "componentContentWorkUom", "period_comp_cont_work_uom")
+            };
+
+            // Skip subtotal/summary row without minimal identifying columns
+            if (string.IsNullOrWhiteSpace(item.FacilityName) && string.IsNullOrWhiteSpace(item.FlowName) && string.IsNullOrWhiteSpace(item.ProductName))
+            {
+                continue;
+            }
+
+            list.Add(item);
+        }
+
+        return (list, hiddenCount);
+    }
+
+    private static object? GetRawColValue(IXLRow row, Dictionary<string, int> colMap, params string[] candidateKeys)
+    {
+        foreach (var key in candidateKeys)
+        {
+            var norm = CleanHeader(key);
+            if (colMap.TryGetValue(norm, out int colIdx))
+            {
+                var cell = row.Cell(colIdx);
+                if (!cell.IsEmpty())
+                {
+                    if (cell.DataType == XLDataType.DateTime)
+                    {
+                        return cell.GetDateTime();
+                    }
+                    if (cell.DataType == XLDataType.TimeSpan)
+                    {
+                        return cell.GetTimeSpan();
+                    }
+                    var formatted = cell.GetFormattedString()?.Trim();
+                    if (!string.IsNullOrEmpty(formatted))
+                    {
+                        return formatted;
+                    }
+                    return cell.Value.ToString()?.Trim();
+                }
+            }
+        }
+        return null;
+    }
+
+    private static string GetColString(IXLRow row, Dictionary<string, int> colMap, params string[] candidateKeys)
+    {
+        var obj = GetRawColValue(row, colMap, candidateKeys);
+        if (obj == null) return string.Empty;
+        if (obj is DateTime dt)
+        {
+            return dt.ToString("yyyy-MM-dd");
+        }
+        return obj.ToString()?.Trim() ?? string.Empty;
+    }
+
+    private static string ParseDateString(object? rawVal)
+    {
+        if (rawVal == null) return string.Empty;
+        if (rawVal is DateTime dt) return dt.ToString("yyyy-MM-dd");
+
+        var str = rawVal.ToString()?.Trim();
+        if (string.IsNullOrEmpty(str)) return string.Empty;
+
+        string[] formats = {
+            "yyyy-MM-dd", "d-MMM-yyyy", "dd-MMM-yyyy", "d-MMMM-yyyy", "dd-MMMM-yyyy",
+            "dd/MM/yyyy", "d/M/yyyy", "MM/dd/yyyy", "M/d/yyyy"
+        };
+
+        if (DateTime.TryParseExact(str, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDt) ||
+            DateTime.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDt) ||
+            DateTime.TryParse(str, CultureInfo.GetCultureInfo("id-ID"), DateTimeStyles.None, out parsedDt))
+        {
+            return parsedDt.ToString("yyyy-MM-dd");
+        }
+
+        return str;
+    }
+
+    private List<SotProductionRow> ParseExcelRowsExcelDataReader(Stream stream)
     {
         var list = new List<SotProductionRow>();
 
@@ -107,16 +333,7 @@ public class SotProductionConverter : ISotProductionConverter
             }
         }
 
-        string CleanHeader(string raw)
-        {
-            return raw.Replace(" ", "")
-                      .Replace("_", "")
-                      .Replace("-", "")
-                      .Replace(".", "")
-                      .ToLowerInvariant();
-        }
-
-        object? GetRawColValue(DataRow row, params string[] candidateKeys)
+        object? GetRawColValueFromDataRow(DataRow row, params string[] candidateKeys)
         {
             foreach (var key in candidateKeys)
             {
@@ -133,38 +350,15 @@ public class SotProductionConverter : ISotProductionConverter
             return null;
         }
 
-        string GetColString(DataRow row, params string[] candidateKeys)
+        string GetColStringFromDataRow(DataRow row, params string[] candidateKeys)
         {
-            var obj = GetRawColValue(row, candidateKeys);
+            var obj = GetRawColValueFromDataRow(row, candidateKeys);
             if (obj == null) return string.Empty;
             if (obj is DateTime dt)
             {
                 return dt.ToString("yyyy-MM-dd");
             }
             return obj.ToString()?.Trim() ?? string.Empty;
-        }
-
-        string ParseDateString(object? rawVal)
-        {
-            if (rawVal == null) return string.Empty;
-            if (rawVal is DateTime dt) return dt.ToString("yyyy-MM-dd");
-
-            var str = rawVal.ToString()?.Trim();
-            if (string.IsNullOrEmpty(str)) return string.Empty;
-
-            string[] formats = {
-                "yyyy-MM-dd", "d-MMM-yyyy", "dd-MMM-yyyy", "d-MMMM-yyyy", "dd-MMMM-yyyy",
-                "dd/MM/yyyy", "d/M/yyyy", "MM/dd/yyyy", "M/d/yyyy"
-            };
-
-            if (DateTime.TryParseExact(str, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDt) ||
-                DateTime.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDt) ||
-                DateTime.TryParse(str, CultureInfo.GetCultureInfo("id-ID"), DateTimeStyles.None, out parsedDt))
-            {
-                return parsedDt.ToString("yyyy-MM-dd");
-            }
-
-            return str;
         }
 
         for (int r = headerRowIndex + 1; r < table.Rows.Count; r++)
@@ -183,48 +377,60 @@ public class SotProductionConverter : ISotProductionConverter
             }
             if (allEmpty) continue;
 
-            var rawPeriodDate = GetRawColValue(dr, "periodDate", "period_date", "date", "tanggal");
+            var rawPeriodDate = GetRawColValueFromDataRow(dr, "periodDate", "period_date", "date", "tanggal");
 
             var item = new SotProductionRow
             {
-                ProdVolumeName = GetColString(dr, "prodVolumeName", "volumeName", "prod_volume_name"),
-                ProdVolumeOperatorName = GetColString(dr, "prodVolumeOperatorName", "operatorName", "operator", "prod_volume_operator_name"),
-                FacilityName = GetColString(dr, "facilityName", "facility_name"),
-                FacilityKind = GetColString(dr, "facilityKind", "facility_kind"),
-                FacilityNamingSystem = GetColString(dr, "facilityNamingSystem", "namingSystem", "facility_naming_system"),
-                ContextFacility = GetColString(dr, "contextFacility", "context_facility"),
-                FacilityParent1 = GetColString(dr, "facilityParent1", "facility_parent1", "parent1"),
-                FacilityParent1Kind = GetColString(dr, "facilityParent1Kind", "facility_parent1_kind", "parent1Kind"),
-                FacilityParent2 = GetColString(dr, "facilityParent2", "facility_parent2", "parent2"),
-                FacilityParent2Kind = GetColString(dr, "facilityParent2Kind", "facility_parent2_kind", "parent2Kind"),
-                FlowName = GetColString(dr, "flowName", "flow_name"),
-                FlowKind = GetColString(dr, "flowKind", "flow_kind"),
-                FlowDirection = GetColString(dr, "flowDirection", "flow_direction"),
-                FlowQualifier = GetColString(dr, "flowQualifier", "flow_qualifier"),
-                ProductName = GetColString(dr, "productName", "product_name"),
-                ProductKind = GetColString(dr, "productKind", "product_kind"),
-                PeriodKind = GetColString(dr, "periodKind", "period_kind"),
+                ProdVolumeName = GetColStringFromDataRow(dr, "prodVolumeName", "volumeName", "prod_volume_name"),
+                ProdVolumeOperatorName = GetColStringFromDataRow(dr, "prodVolumeOperatorName", "operatorName", "operator", "prod_volume_operator_name"),
+                FacilityName = GetColStringFromDataRow(dr, "facilityName", "facility_name"),
+                FacilityKind = GetColStringFromDataRow(dr, "facilityKind", "facility_kind"),
+                FacilityNamingSystem = GetColStringFromDataRow(dr, "facilityNamingSystem", "namingSystem", "facility_naming_system"),
+                ContextFacility = GetColStringFromDataRow(dr, "contextFacility", "context_facility"),
+                FacilityParent1 = GetColStringFromDataRow(dr, "facilityParent1", "facility_parent1", "parent1"),
+                FacilityParent1Kind = GetColStringFromDataRow(dr, "facilityParent1Kind", "facility_parent1_kind", "parent1Kind"),
+                FacilityParent2 = GetColStringFromDataRow(dr, "facilityParent2", "facility_parent2", "parent2"),
+                FacilityParent2Kind = GetColStringFromDataRow(dr, "facilityParent2Kind", "facility_parent2_kind", "parent2Kind"),
+                FlowName = GetColStringFromDataRow(dr, "flowName", "flow_name"),
+                FlowKind = GetColStringFromDataRow(dr, "flowKind", "flow_kind"),
+                FlowDirection = GetColStringFromDataRow(dr, "flowDirection", "flow_direction"),
+                FlowQualifier = GetColStringFromDataRow(dr, "flowQualifier", "flow_qualifier"),
+                ProductName = GetColStringFromDataRow(dr, "productName", "product_name"),
+                ProductKind = GetColStringFromDataRow(dr, "productKind", "product_kind"),
+                PeriodKind = GetColStringFromDataRow(dr, "periodKind", "period_kind"),
                 PeriodDate = ParseDateString(rawPeriodDate),
-                PeriodVolumeValue = GetColString(dr, "periodVolumeValue", "volumeValue", "volume", "period_volume_value"),
-                PeriodVolumeValueUom = GetColString(dr, "periodVolumeValueUom", "volumeUom", "uom", "period_volume_value_uom"),
-                PeriodBlnceSetKind = GetColString(dr, "periodBlnceSetKind", "balanceSetKind", "period_blnce_set_kind"),
-                BlnceSetCargoNumber = GetColString(dr, "BlnceSetCargoNumber", "cargoNumber", "blnce_set_cargo_number"),
-                BlnceSetCargoBatchNumber = GetColString(dr, "BlnceSetCargoBatchNumber", "cargoBatchNumber", "blnce_set_cargo_batch_number"),
-                BlnceSetShipper = GetColString(dr, "BlnceSetShipper", "shipper", "blnce_set_shipper"),
-                BlnceSetBuyer = GetColString(dr, "BlnceSetBuyer", "buyer", "blnce_set_buyer"),
-                BlnceSetDestinationName = GetColString(dr, "BlnceSetDestinationName", "destinationName", "destination", "blnce_set_destination_name"),
-                BlnceSetOwner = GetColString(dr, "BlnceSetOwner", "owner", "blnce_set_owner"),
-                BlnceSetEventKind = GetColString(dr, "BlnceSetEventKind", "eventKind", "blnce_set_event_kind"),
-                PeriodBlnceSetVolValue = GetColString(dr, "periodBlnceSetVolValue", "balanceVolumeValue", "period_blnce_set_vol_value"),
-                PeriodBlnceVolValueUom = GetColString(dr, "periodBlnceVolValueUom", "balanceVolumeUom", "period_blnce_vol_value_uom"),
-                PeriodCompContWork = GetColString(dr, "periodCompContWork", "componentContentWork", "period_comp_cont_work"),
-                PeriodCompContWorkUom = GetColString(dr, "periodCompContWorkUom", "componentContentWorkUom", "period_comp_cont_work_uom")
+                PeriodVolumeValue = GetColStringFromDataRow(dr, "periodVolumeValue", "volumeValue", "volume", "period_volume_value"),
+                PeriodVolumeValueUom = GetColStringFromDataRow(dr, "periodVolumeValueUom", "volumeUom", "uom", "period_volume_value_uom"),
+                PeriodBlnceSetKind = GetColStringFromDataRow(dr, "periodBlnceSetKind", "balanceSetKind", "period_blnce_set_kind"),
+                BlnceSetCargoNumber = GetColStringFromDataRow(dr, "BlnceSetCargoNumber", "cargoNumber", "blnce_set_cargo_number"),
+                BlnceSetCargoBatchNumber = GetColStringFromDataRow(dr, "BlnceSetCargoBatchNumber", "cargoBatchNumber", "blnce_set_cargo_batch_number"),
+                BlnceSetShipper = GetColStringFromDataRow(dr, "BlnceSetShipper", "shipper", "blnce_set_shipper"),
+                BlnceSetBuyer = GetColStringFromDataRow(dr, "BlnceSetBuyer", "buyer", "blnce_set_buyer"),
+                BlnceSetDestinationName = GetColStringFromDataRow(dr, "BlnceSetDestinationName", "destinationName", "destination", "blnce_set_destination_name"),
+                BlnceSetOwner = GetColStringFromDataRow(dr, "BlnceSetOwner", "owner", "blnce_set_owner"),
+                BlnceSetEventKind = GetColStringFromDataRow(dr, "BlnceSetEventKind", "eventKind", "blnce_set_event_kind"),
+                PeriodBlnceSetVolValue = GetColStringFromDataRow(dr, "periodBlnceSetVolValue", "balanceVolumeValue", "period_blnce_set_vol_value"),
+                PeriodBlnceVolValueUom = GetColStringFromDataRow(dr, "periodBlnceVolValueUom", "balanceVolumeUom", "period_blnce_vol_value_uom"),
+                PeriodCompContWork = GetColStringFromDataRow(dr, "periodCompContWork", "componentContentWork", "period_comp_cont_work"),
+                PeriodCompContWorkUom = GetColStringFromDataRow(dr, "periodCompContWorkUom", "componentContentWorkUom", "period_comp_cont_work_uom")
             };
 
             list.Add(item);
         }
 
         return list;
+    }
+
+    private static string CleanHeader(string raw)
+    {
+        return raw.Replace(" ", "")
+                  .Replace("_", "")
+                  .Replace("-", "")
+                  .Replace(".", "")
+                  .Replace("[", "")
+                  .Replace("]", "")
+                  .Replace("/", "")
+                  .ToLowerInvariant();
     }
 
     private string GenerateProdMlXml(List<SotProductionRow> rows, string fileName)
